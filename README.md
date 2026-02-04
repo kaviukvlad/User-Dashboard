@@ -1,36 +1,74 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Тестове завдання, реалізоване на **Next.js 16 (App Router)**. Додаток дозволяє
+переглядати список користувачів, фільтрувати їх за іменем та містом, а також
+редагувати інформацію про них.
 
-## Getting Started
+## Технічний стек
 
-First, run the development server:
+- **Framework**: Next.js 16.1 (App Router)
+- **Library**: React 19
+- **Language**: TypeScript (Strict mode)
+- **Styling**: Tailwind CSS
+- **Forms & Validation**: React Hook Form + Zod
+- **Icons**: Lucide React
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+## Як запустити проект
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Встановити залежності:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+    npm install
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Запустити локальний сервер:
 
-## Learn More
+    npm run dev
 
-To learn more about Next.js, take a look at the following resources:
+    Відкрити http://localhost:3000 у браузері
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Архітектура та Рішення
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+1. Розділення відповідальності (Separation of Concerns) Проект побудований за
+   принципом компонентної ізоляції:
 
-## Deploy on Vercel
+Server Component (page.tsx): Відповідає виключно за початкове отримання даних
+(Data Fetching). Це забезпечує швидкий перший рендер (FCP) та SEO.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Client Container (UsersDashboard.tsx): Він не містить складної логіки, а лише
+зв'язує хуки та UI компоненти.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Custom Hook (useUsersFilter.ts): Вся бізнес-логіка (фільтрація, пошук, мутація
+даних) винесена в окремий хук. Це робить код чистішим та легшим для тестування.
+
+Atomic UI Components: Інтерфейс розбитий на малі, компоненти (UserCard,
+UserSearch, CityFilter), які відповідають лише за відображення.
+
+2. Оптимізація продуктивності (Render Optimization) Для запобігання зайвим
+   ре-рендерам при взаємодії з UI (наприклад, при відкритті модального вікна
+   редагування):
+
+React.memo: Використано для обгортання компонентів списку та фільтрів. Це
+гарантує, що сітка карток не перемальовується, коли змінюється лише стан
+модалки.
+
+3. Робота з даними Local Mutation: Оскільки бекенд є зовнішнім
+   (JSONPlaceholder), оновлення даних реалізовано оптимістично на клієнті через
+   локальний стейт.
+
+Validation: Для форми редагування використано Zod, що забезпечує сувору
+типізацію та валідацію email/імені на льоту.
+
+Покращення для Production Якби цей проект готувався до реального продакшену, я б
+додав наступне:
+
+URL State Synchronization: Зберігати параметри пошуку та фільтрів у URL
+(?search=john&city=London), щоб посиланням можна було ділитися.
+
+API Routes: Реалізувати Next.js API Routes для проксіювання запитів та обробки
+помилок бекенду.
+
+Virtualization: Для списків більше 1000 елементів використати react-window для
+віртуалізації DOM.
+
+Accessibility : Покращити навігацію клавіатурою по картках та фокус-менеджмент у
+модальних вікнах (хоча базовий <dialog> це підтримує).
+
+Unit Tests: Додати тести для хука useUsersFilter та компонентів за допомогою
+Jest/React Testing Library.
